@@ -17,6 +17,11 @@ def extract_id_user(players):
 		
 		print("steamid is" , steam_id)
 		print("username is", user_name)
+		#TODO write dotabuff to file maybe
+		dotabuff_link = "dotabuff.com/players/" + str(convert_text_to_32id(steam_id))
+		opendota_link = "https://www.opendota.com/players/" + str(convert_text_to_32id(steam_id))
+		print("Dota Buff is ", dotabuff_link)
+		print("Open Dota is ", opendota_link)
 		player_dict[user_name] = steam_id
 
 	return player_dict
@@ -30,7 +35,10 @@ def query_opendota_api(player_list):
 		print(acc_info)
 
 if __name__ == "__main__":
+	#michigan
 	url = "https://cstarleague.com/dota2/teams/839"
+	#purdue
+	url = "https://cstarleague.com/dota2/teams/2496"
 	headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 	request = Request(url, headers = headers)
 	content = urlopen(request).read()
