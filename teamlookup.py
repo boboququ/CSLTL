@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import urllib
 from urllib.request import urlopen, Request
 from steamtest import *
 
@@ -52,23 +53,39 @@ def print_player_info(player_dict):
 
 	return 
 
+def player_info_to_string(player_dict):
+	return_string = ""
+	for username in player_dict:
+		player = player_dict[username]
+		return_string = return_string + "CSL USERNAME IS: " +  str(username or "") + "\n"
+		return_string = return_string + "SOLO MMR: " + str(player["solommr"] or "") + " MMR ESTIMATE: " +  str(player["mmr_estimate"] or "") + "\n"
+		return_string = return_string + str(player["dotabuff_link"] or "") + "\n"
+		return_string = return_string + str(player["opendota_link"] or "") + "\n"
+		return_string = return_string + "\n"
+	return return_string
+
 def look_up_team(team_id):
 	url = "https://cstarleague.com/dota2/teams/"
 	url = url + str(team_id)
-
+	print("Looking up URL" + url)
 	headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
-	request = Request(url, headers = headers)
-	content = urlopen(request).read()
-	soup = BeautifulSoup(content, 'lxml')
 	
-	players = soup.findAll("span", {"class" : "tool-tip"})
+	try:
+		request = Request(url, headers = headers)
+		content = urlopen(request).read()
+		soup = BeautifulSoup(content, 'lxml')
+		
+		players = soup.findAll("span", {"class" : "tool-tip"})
 
-	player_dict = extract_id_user(players)
-	
-	player_dict = query_opendota_api(player_dict)
+		player_dict = extract_id_user(players)
+		
+		player_dict = query_opendota_api(player_dict)
 
-	print_player_info(player_dict)
-
+		#print_player_info(player_dict)
+		return player_info_to_string(player_dict)
+	except urllib.error.HTTPError as e:
+		print("404 error")
+		return ""
 if __name__ == "__main__":
 	#michigan
 	url = 839
@@ -77,8 +94,9 @@ if __name__ == "__main__":
 	#simon fraser
 	url = 4982
 	#Trine Thunder
-	url = 4621
+	trine = 4621
+	trine = 1360
 
-	look_up_team(purdue)
+	print(look_up_team(trine))
 
 
