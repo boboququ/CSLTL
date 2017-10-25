@@ -1,5 +1,6 @@
 from slackclient import SlackClient
 from teamlookup import *
+import os
 import time
 
 class CSL_Lookup_Bot(object):
@@ -99,5 +100,7 @@ class CSL_Lookup_Bot(object):
 if __name__ == "__main__":
     #create instance of bot
     #run bot
+    bot_token = os.environ.get("BOT_TOKEN")
+    print(bot_token)
     bot_instance = CSL_Lookup_Bot(bot_token)
     bot_instance.run()
