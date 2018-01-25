@@ -18,7 +18,7 @@ def get_account_info(id_32):
 		print("bad call to api")
 	else:
 		JSON = json.loads(request.content.decode("utf-8"))
-		return JSON["solo_competitive_rank"], JSON["mmr_estimate"]
+		return JSON["solo_competitive_rank"], JSON["mmr_estimate"], JSON["rank_tier"], JSON["rank"]
 
 if __name__ == '__main__':
 	steam_id = "STEAM_0:1:51900704"

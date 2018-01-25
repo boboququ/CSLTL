@@ -34,9 +34,17 @@ def query_opendota_api(player_dict):
 	for username in player_dict:
 		player = player_dict[username]
 		steam_32id = convert_text_to_32id(player["steam_id"])
-		solommr, mmr_estimate = get_account_info(steam_32id)
+		solommr, mmr_estimate, rank_id, rank = get_account_info(steam_32id)
 		player["solommr"] = solommr
 		player["mmr_estimate"] = mmr_estimate
+		
+		if rank:
+			player["rank"] = rank
+		else:
+			badges = ["Herald", "Guardian", "Crusader", "Archon", "Legend", "Ancient", "Divine"]
+			player["badge"] = badges[math.floor(rank_id/6)];
+			player["stars"] = rank_id % 6;
+			
 		player_dict[username] = player
 
 	return player_dict
@@ -45,7 +53,11 @@ def print_player_info(player_dict):
 	for username in player_dict:
 		player = player_dict[username]
 
-		print("CSL USERNAME IS: ", username)
+		if player["rank"]:
+			print(username, ": Rank ", player["rank"])
+		else:
+			print(username, ": ", player["badge"] , " " player["stars"])
+			
 		print("SOLO MMR: ", player["solommr"], " MMR ESTIMATE: ", player["mmr_estimate"])
 		print(player["dotabuff_link"])
 		print(player["opendota_link"])
