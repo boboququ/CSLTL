@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import urllib
+import math
 from urllib.request import urlopen, Request
 from steamtest import *
 
@@ -34,16 +35,20 @@ def query_opendota_api(player_dict):
 	for username in player_dict:
 		player = player_dict[username]
 		steam_32id = convert_text_to_32id(player["steam_id"])
-		solommr, mmr_estimate, rank_id, rank = get_account_info(steam_32id)
+		solommr, mmr_estimate, rank_number, leaderboard_rank = get_account_info(steam_32id)
 		player["solommr"] = solommr
 		player["mmr_estimate"] = mmr_estimate
-		
-		if rank:
-			player["rank"] = rank
+		player["rank"] = ""
+		player["stars"] = ""
+		if rank_number == None:
+			player["badge"] = "Unranked"
+		elif leaderboard_rank != None:
+			player["rank"] = leaderboard_rank
+			player["badge"] = "Divine 5"
 		else:
 			badges = ["Herald", "Guardian", "Crusader", "Archon", "Legend", "Ancient", "Divine"]
-			player["badge"] = badges[math.floor(rank_id/6)];
-			player["stars"] = rank_id % 6;
+			player["badge"] = badges[math.floor(rank_number/10) - 1];
+			player["stars"] = rank_number % 10;
 			
 		player_dict[username] = player
 
@@ -56,7 +61,7 @@ def print_player_info(player_dict):
 		if player["rank"]:
 			print(username, ": Rank ", player["rank"])
 		else:
-			print(username, ": ", player["badge"] , " " player["stars"])
+			print(username, ": ", player["badge"] , " ", player["stars"])
 			
 		print("SOLO MMR: ", player["solommr"], " MMR ESTIMATE: ", player["mmr_estimate"])
 		print(player["dotabuff_link"])
@@ -71,6 +76,7 @@ def player_info_to_string(player_dict):
 		player = player_dict[username]
 		return_string = return_string + "CSL USERNAME IS: " +  str(username or "") + "\n"
 		return_string = return_string + "SOLO MMR: " + str(player["solommr"] or "") + " MMR ESTIMATE: " +  str(player["mmr_estimate"] or "") + "\n"
+		return_string = return_string + "RANK TIER: " + str(player["badge"] or "") + " " + str(player["stars"]) + str(player["rank"] or "") + "\n"
 		return_string = return_string + str(player["dotabuff_link"] or "") + "\n"
 		return_string = return_string + str(player["opendota_link"] or "") + "\n"
 		return_string = return_string + "\n"
@@ -101,14 +107,7 @@ def look_up_team(team_id):
 if __name__ == "__main__":
 	#michigan
 	url = 839
-	#purdue
-	purdue = 2496
-	#simon fraser
-	url = 4982
-	#Trine Thunder
-	trine = 4621
-	trine = 1360
 
-	print(look_up_team(trine))
+	print(look_up_team(url))
 
 
