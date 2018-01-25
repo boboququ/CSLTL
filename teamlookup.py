@@ -42,7 +42,7 @@ def query_opendota_api(player_dict):
 			player["rank"] = rank
 		else:
 			badges = ["Herald", "Guardian", "Crusader", "Archon", "Legend", "Ancient", "Divine"]
-			player["badge"] = math.floor(rank_id/6);
+			player["badge"] = badges[math.floor(rank_id/6)];
 			player["stars"] = rank_id % 6;
 			
 		player_dict[username] = player
