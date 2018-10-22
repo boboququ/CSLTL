@@ -70,8 +70,8 @@ def print_player_info(player_dict):
 
 	return 
 
-def player_info_to_string(player_dict):
-	return_string = ""
+def player_info_to_string(player_dict, team_name):
+	return_string = team_name + "\n\n"
 	for username in player_dict:
 		player = player_dict[username]
 		return_string = return_string + "CSL USERNAME IS: " +  str(username or "") + "\n"
@@ -82,10 +82,17 @@ def player_info_to_string(player_dict):
 		return_string = return_string + "\n"
 	return return_string
 
+def extract_team_id(team_banner_div):
+	#TODO: Don't do this with brute force
+	team_banner_div = str(team_banner_div[0])
+	team_banner_div = team_banner_div[team_banner_div.find("h3")+3:team_banner_div.find("</h3>")]
+	team_banner_div = team_banner_div[team_banner_div.find(">")+1:team_banner_div.find("</a>")]
+	return team_banner_div
+
 def look_up_team(team_id):
 	url = "https://cstarleague.com/dota2/teams/"
 	url = url + str(team_id)
-	print("Looking up URL" + url)
+	print("Looking up URL " + url)
 	headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 	
 	try:
@@ -93,6 +100,11 @@ def look_up_team(team_id):
 		content = urlopen(request).read()
 		soup = BeautifulSoup(content, 'lxml')
 		
+		team_name_div = soup.findAll("div", {"class" : "hero-title"})
+		team_name = extract_team_id(team_name_div)
+
+		#print(team_name)
+
 		players = soup.findAll("span", {"class" : "tool-tip"})
 
 		player_dict = extract_id_user(players)
@@ -100,7 +112,7 @@ def look_up_team(team_id):
 		player_dict = query_opendota_api(player_dict)
 
 		#print_player_info(player_dict)
-		return player_info_to_string(player_dict)
+		return player_info_to_string(player_dict, team_name)
 	except urllib.error.HTTPError as e:
 		print("404 error")
 		return ""
@@ -109,5 +121,6 @@ if __name__ == "__main__":
 	url = 839
 
 	print(look_up_team(url))
+
 
 
