@@ -20,7 +20,7 @@ def extract_id_user(players):
 		#print("steamid is" , steam_id)
 		#print("username is", user_name)
 		#TODO write dotabuff to file maybe
-		dotabuff_link = "dotabuff.com/players/" + str(convert_text_to_32id(steam_id))
+		dotabuff_link = "https://dotabuff.com/players/" + str(convert_text_to_32id(steam_id))
 		opendota_link = "https://www.opendota.com/players/" + str(convert_text_to_32id(steam_id))
 		#print("Dota Buff is ", dotabuff_link)
 		#print("Open Dota is ", opendota_link)
@@ -121,6 +121,7 @@ if __name__ == "__main__":
 	url = 839
 
 	print(look_up_team(url))
+	print(look_up_team(7542))
 
 
 
