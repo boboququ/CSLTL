@@ -2,7 +2,6 @@ import discord
 from teamlookup import *
 import os
 
-TOKEN = ""
 CLIENT_ID = ""
 client = discord.Client()
 
@@ -55,7 +54,13 @@ async def on_message(message):
 			await Handle_Lookup_Message(client, message.channel, team_id)
 
 
+#token from environment variables
+
+
 if __name__ == '__main__':
-	TOKEN = os.environ.get("DISCORD_TOKEN")
-	CLIENT_ID = os.environ.get("DISCORD_CLIENT_ID")
-	client.run(TOKEN)
+	discord_token = os.environ.get("DISCORD_TOKEN")
+	discord_client_id = os.environ.get("DISCORD_CLIENT_ID")
+	print(discord_token)
+	print(discord_client_id)
+	CLIENT_ID = discord_client_id
+	client.run(discord_token)
