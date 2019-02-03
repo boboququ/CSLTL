@@ -75,10 +75,11 @@ class CSL_Lookup_Bot(object):
         if "http" in team_id:
             team_id = team_id[team_id.rfind("/") + 1:]
         print(team_id)
-        return_message = look_up_team(team_id)
-        if return_message == "":
-            return_message = "404 error"
-        self.write_to_slack(channel, return_message)
+        return_messages = look_up_team(team_id)
+        for return_message in return_messages:
+            if return_message == "":
+                return_message = "404 error"
+            self.write_to_slack(channel, return_message)
 
     def run(self):
         self.slack_connect()
