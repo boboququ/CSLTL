@@ -71,7 +71,6 @@ class HeroData:
         """
         # Steam key from environment vars. Get one or ask Bo Qu :)
         self._api_key = os.environ.get("STEAM_KEY")
-        self._api_key = "5702A306A57CDC3AC6716D0963514C70"
         req = requests.get(HERO_DATA_ENDPOINT,
                            params=dict(key=self._api_key, language=lang))
         self.hero_info, _, _ = create_hero_dicts(req.json()['result'])
