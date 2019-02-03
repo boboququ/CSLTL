@@ -1,3 +1,4 @@
+"""Team Lookup logic."""
 import math
 import urllib
 from urllib.request import urlopen, Request
@@ -48,11 +49,12 @@ def query_opendota_api(player_dict):
         player["mmr_estimate"] = mmr_estimate
         player["rank"] = ""
         player["stars"] = ""
+        player["heroes"] = get_account_heroes(steam_32id)
         if rank_number == None:
             player["badge"] = "Unranked"
         elif leaderboard_rank != None:
             player["rank"] = leaderboard_rank
-            player["badge"] = "Divine 5"
+            player["badge"] = "Immortal"
         else:
             badges = ["Herald", "Guardian", "Crusader", "Archon", "Legend",
                       "Ancient", "Divine"]
@@ -84,21 +86,27 @@ def print_player_info(player_dict):
 
 def player_info_to_string(player_dict, team_name):
     return_string = team_name + "\n\n"
-    for username in player_dict:
-        player = player_dict[username]
-        return_string = return_string + "CSL USERNAME IS: " + str(
+    for username, player in player_dict.items():
+        return_string += "CSL USERNAME IS: " + str(
             username or "") + "\n"
-        return_string = return_string + "SOLO MMR: " + str(
+        return_string += "SOLO MMR: " + str(
             player["solommr"] or "") + " MMR ESTIMATE: " + str(
             player["mmr_estimate"] or "") + "\n"
-        return_string = return_string + "RANK TIER: " + str(
+        return_string += "RANK TIER: " + str(
             player["badge"] or "") + " " + str(player["stars"]) + str(
             player["rank"] or "") + "\n"
-        return_string = return_string + str(
+
+        return_string += str(
             player["dotabuff_link"] or "") + "\n"
-        return_string = return_string + str(
+        return_string += str(
             player["opendota_link"] or "") + "\n"
-        return_string = return_string + "\n"
+
+        return_string += "5 MOST PLAYED HEROES (last 100 games):\n"
+        for hero in player["heroes"]:
+            return_string += hero['loc_name'] + ":\t"
+            return_string += str(hero['games']) + " games, "
+            return_string += f"{100 * hero['winrate']:.2f}" + "% winrate\n"
+        return_string += "\n"
     return return_string
 
 

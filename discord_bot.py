@@ -1,3 +1,4 @@
+"""Discord bindings for TangyBot."""
 import os
 
 import discord
@@ -8,12 +9,12 @@ CLIENT_ID = ""
 client = discord.Client()
 
 
-async def Write_To_Discord(client, channel, message_contents):
+async def write_to_discord(client, channel, message_contents):
     # client.send_message(message.channel, "Looking up team " + str(team_id))
     await client.send_message(channel, "Found " + str(message_contents))
 
 
-async def Handle_Lookup_Message(client, channel, team_id):
+async def handle_lookup_message(client, channel, team_id):
     if "http" in team_id:
         team_id = team_id[team_id.rfind("/") + 1:]
         print(team_id)
@@ -24,12 +25,12 @@ async def Handle_Lookup_Message(client, channel, team_id):
     if return_message == "":
         return_message = "404 error"
 
-    await Write_To_Discord(client, channel, return_message)
+    await write_to_discord(client, channel, return_message)
 
 
-async def Handle_Help_Message(self, channel):
+async def handle_help_message(self, channel):
     message = "How to Use: @tangy_bot lookup<space><team_url or team id> \n"
-    Write_To_Discord(client, channel, message)
+    write_to_discord(client, channel, message)
 
 
 @client.event
@@ -54,7 +55,7 @@ async def on_message(message):
 
         if read_command[0] == "lookup":
             team_id = read_command[1]
-            await Handle_Lookup_Message(client, message.channel, team_id)
+            await handle_lookup_message(client, message.channel, team_id)
 
 
 # token from environment variables
