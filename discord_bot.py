@@ -11,7 +11,7 @@ client = discord.Client()
 
 async def write_to_discord(client, channel, message_contents):
     # client.send_message(message.channel, "Looking up team " + str(team_id))
-    await client.send_message(channel, "Found " + str(message_contents))
+    await client.send_message(channel, str(message_contents))
 
 
 async def handle_lookup_message(client, channel, team_id):

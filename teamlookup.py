@@ -46,7 +46,7 @@ def query_opendota_api(player_dict):
         solommr, mmr_estimate, rank_number, leaderboard_rank = get_account_info(
             steam_32id)
         player["solommr"] = solommr
-        player["mmr_estimate"] = mmr_estimate
+        player["mmr_estimate"] = mmr_estimate['estimate']
         player["rank"] = ""
         player["stars"] = ""
         player["heroes"] = get_account_heroes(steam_32id)
@@ -89,13 +89,13 @@ def player_info_to_string(player_dict, team_name):
     for username, player in player_dict.items():
         return_string = "```\n"
         return_string += "CSL USERNAME IS: " + str(
-            username or "") + "\n"
+            username or "?") + "\n"
         return_string += "SOLO MMR: " + str(
-            player["solommr"] or "") + " MMR ESTIMATE: " + str(
-            player["mmr_estimate"] or "") + "\n"
+            player["solommr"] or "?") + " MMR ESTIMATE: " + str(
+            player["mmr_estimate"] or "?") + "\n"
         return_string += "RANK TIER: " + str(
-            player["badge"] or "") + " " + str(player["stars"]) + str(
-            player["rank"] or "") + "\n"
+            player["badge"] or "?") + " " + str(player["stars"]) + str(
+            player["rank"] or "?") + "\n"
 
         return_string += "5 MOST PLAYED HEROES (last 100 games):\n"
         for hero in player["heroes"]:
@@ -104,7 +104,8 @@ def player_info_to_string(player_dict, team_name):
             return_string += f"{100 * hero['winrate']:.2f}" + "% winrate\n"
         return_string += "\n```"
 
-        profile_links = str(player["dotabuff_link"] or "") + "\n"
+        profile_links = str(username or "?") + " links:\n"
+        profile_links += str(player["dotabuff_link"] or "") + "\n"
         profile_links += str(player["opendota_link"] or "") + "\n"
 
         return_strings.append(return_string)
