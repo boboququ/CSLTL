@@ -47,6 +47,8 @@ async def on_message(message):
         return
     if message.content == "TangyBot":
         await client.send_message(message.channel, "Present")
+    elif message.content == "BoBot":
+        await client.send_message(message.channel, "NANI")
     if message.content.startswith("<@" + CLIENT_ID):
         print("tagged")
         start_location = message.content.find('>')
