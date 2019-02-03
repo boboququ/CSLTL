@@ -20,12 +20,13 @@ async def handle_lookup_message(client, channel, team_id):
         print(team_id)
 
     await client.send_message(channel, "Looking up team " + str(team_id))
-    return_message = look_up_team(team_id)
+    return_messages = look_up_team(team_id)
 
-    if return_message == "":
-        return_message = "404 error"
+    for return_message in return_messages:
+        if return_message == "":
+            return_message = "404 error"
 
-    await write_to_discord(client, channel, return_message)
+        await write_to_discord(client, channel, return_message)
 
 
 async def handle_help_message(self, channel):

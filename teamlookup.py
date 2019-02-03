@@ -85,8 +85,9 @@ def print_player_info(player_dict):
 
 
 def player_info_to_string(player_dict, team_name):
-    return_string = team_name + "\n\n"
+    return_strings = [team_name + "\n\n"]
     for username, player in player_dict.items():
+        return_string = ""
         return_string += "CSL USERNAME IS: " + str(
             username or "") + "\n"
         return_string += "SOLO MMR: " + str(
@@ -107,7 +108,8 @@ def player_info_to_string(player_dict, team_name):
             return_string += str(hero['games']) + " games, "
             return_string += f"{100 * hero['winrate']:.2f}" + "% winrate\n"
         return_string += "\n"
-    return return_string
+        return_strings.append(return_string)
+    return return_strings
 
 
 def extract_team_id(team_banner_div):
