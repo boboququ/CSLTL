@@ -57,6 +57,9 @@ class HeroData:
         id: hero id; the key used to obtain this information
         loc_name: localized name
 
+    max_name_len: int
+        The maximum length of a localized hero name.
+
     """
 
     def __init__(self, lang="en"):
@@ -74,6 +77,9 @@ class HeroData:
         req = requests.get(HERO_DATA_ENDPOINT,
                            params=dict(key=self._api_key, language=lang))
         self.hero_info, _, _ = create_hero_dicts(req.json()['result'])
+
+        self.max_name_len = max(len(item['loc_name']) for _, item in
+                                self.hero_info.items())
 
     def __getitem__(self, item):
         """Get hero information from hero id."""
