@@ -87,7 +87,7 @@ def print_player_info(player_dict):
 def player_info_to_string(player_dict, team_name):
     return_strings = [team_name]
     for username, player in player_dict.items():
-        return_string = "—" * 50
+        return_string = "—" * 30 + "\n"
         return_string += "CSL USERNAME: " + str(
             username or "?") + "\n"
         return_string += "SOLO MMR: " + str(player["solommr"] or "?") + "\n"
