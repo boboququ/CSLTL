@@ -87,29 +87,27 @@ def print_player_info(player_dict):
 def player_info_to_string(player_dict, team_name):
     return_strings = [team_name]
     for username, player in player_dict.items():
-        return_string = "```\n"
-        return_string += "CSL USERNAME IS: " + str(
+        return_string = "CSL USERNAME: " + str(
             username or "?") + "\n"
         return_string += "SOLO MMR: " + str(
-            player["solommr"] or "?") + " MMR ESTIMATE: " + str(
+            player["solommr"] or "?") + "\nMMR ESTIMATE: " + str(
             player["mmr_estimate"] or "?") + "\n"
         return_string += "RANK TIER: " + str(
             player["badge"] or "?") + " " + str(player["stars"]) + str(
-            player["rank"] or "?") + "\n"
+            player["rank"] or "") + "\n"
+
+        return_string += "<" + str(player["dotabuff_link"] or "") + ">\n"
+        return_string += "<" + str(player["opendota_link"] or "") + ">\n"
+        return_string += "\n```\n"
 
         return_string += "5 MOST PLAYED HEROES (last 100 games):\n"
         for hero in player["heroes"]:
             return_string += "{:20s}".format(hero['loc_name'])
-            return_string += f"{hero['games']:3d} games, "
+            return_string += f"{hero['games']:3d} games @ "
             return_string += f"{100 * hero['winrate']:.2f}" + "% winrate\n"
         return_string += "\n```"
 
-        profile_links = str(username or "?") + " links:\n"
-        profile_links += str(player["dotabuff_link"] or "") + "\n"
-        profile_links += str(player["opendota_link"] or "") + "\n"
-
         return_strings.append(return_string)
-        return_strings.append(profile_links)
     return return_strings
 
 

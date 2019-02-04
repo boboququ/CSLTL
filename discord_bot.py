@@ -29,9 +29,9 @@ async def handle_lookup_message(client, channel, team_id):
         await write_to_discord(client, channel, return_message)
 
 
-async def handle_help_message(self, channel):
+async def handle_help_message(channel):
     message = "How to Use: @tangy_bot lookup<space><team_url or team id> \n"
-    write_to_discord(client, channel, message)
+    await write_to_discord(client, channel, message)
 
 
 @client.event
@@ -46,9 +46,9 @@ async def on_message(message):
     if message.author == client.user:
         return
     if message.content == "TangyBot":
-        await client.send_message(message.channel, "Present")
+        await write_to_discord(client, message.channel, "Present")
     elif message.content == "BoBot":
-        await client.send_message(message.channel, "NANI")
+        await write_to_discord(client, message.channel, "NANI")
     if message.content.startswith("<@" + CLIENT_ID):
         print("tagged")
         start_location = message.content.find('>')
@@ -59,6 +59,8 @@ async def on_message(message):
         if read_command[0] == "lookup":
             team_id = read_command[1]
             await handle_lookup_message(client, message.channel, team_id)
+        elif read_command[0] == "help":
+            await handle_help_message(message.channel)
 
 
 # token from environment variables
