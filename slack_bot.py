@@ -4,8 +4,6 @@ import time
 
 from slackclient import SlackClient
 
-from teamlookup import *
-
 
 class CSL_Lookup_Bot(object):
     def __init__(self, bot_token):
