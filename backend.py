@@ -187,6 +187,10 @@ class TangyBotBackend:
         TangyBotError
             On a lookup error, i.e. team was not found
 
+        Returns
+        -------
+        data: dict
+
         """
         # Check args for validity first
         if last and not team_number:

@@ -104,6 +104,8 @@ class FrontendFormatter:
                 return_string += "{:20s}".format(hero['loc_name'])
                 return_string += f"{hero['games']:3d} games @ "
                 return_string += f"{100 * hero['winrate']:.2f}" + "% winrate\n"
+            if not heroes:
+                return_string += "No heroes!\n"
 
             return_string += "```"
             return_strings.append(return_string)

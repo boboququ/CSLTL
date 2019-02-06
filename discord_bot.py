@@ -46,7 +46,7 @@ class TangyBotClient(discord.Client):
         print(message.author)
         if message.author == self.user:
             return
-        await self.send_typing(message.channel)
+
         if message.content == "TangyBot":
             await self.send_message(message.channel, "Present")
         elif message.content == "BoBot":
@@ -57,6 +57,8 @@ class TangyBotClient(discord.Client):
             read_message = message.content[start_location + 2:]
             read_command = read_message.split(" ")
             print(read_command)
+
+            await self.send_typing(message.channel)
 
             try:
                 res = self.arg_parse.parse_args(read_command)

@@ -28,6 +28,9 @@ profile ([--last] | [user_1, user_2, ...]) [--num_games (100)]
 
     The tourney only flag limits the results to tournament lobbies only.
 
+session [--delete]
+    Reports
+
 """
 
 import argparse
