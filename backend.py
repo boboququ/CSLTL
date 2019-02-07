@@ -3,7 +3,6 @@
 import asyncio
 
 import boto3
-
 from bs4 import BeautifulSoup
 
 import hero_data
@@ -16,7 +15,6 @@ def extract_id_user(players):
     player_dict = {}
     for player in players:
         player = str(player)
-        # print(player)
         split = player.find("href=\"")
 
         steam_id = player[:split]
@@ -27,16 +25,7 @@ def extract_id_user(players):
 
         steam_id = convert_text_to_32id(steam_id)
 
-        # print("steamid is" , steam_id)
-        # print("username is", user_name)
-        # TODO write dotabuff to file maybe
-        dotabuff_link = "https://dotabuff.com/players/" + str(steam_id)
-        opendota_link = "https://www.opendota.com/players/" + str(steam_id)
-        # print("Dota Buff is ", dotabuff_link)
-        # print("Open Dota is ", opendota_link)
-        player_dict[user_name] = dict(steam_id=steam_id,
-                                      dotabuff_link=dotabuff_link,
-                                      opendota_link=opendota_link)
+        player_dict[steam_id] = dict(csl_name=user_name)
     return player_dict
 
 
@@ -59,7 +48,7 @@ class TangyBotError(Exception):
 
 
 # Mapping of resource to primary key values on aws
-resource_key_names = dict(session="username", profile="steamid")
+RESOURCE_KEY_NAMES = dict(session="username", profile="steamid")
 
 
 class PersistentData:
@@ -131,7 +120,7 @@ class PersistentData:
             for item in table.scan()['Items']:
                 # Even though numeric keys have the weird type Decimal('123')
                 # they still compare fine when we try to access their values
-                key = item.pop(resource_key_names[resource])
+                key = item.pop(RESOURCE_KEY_NAMES[resource])
                 return_dict[key] = item
             return return_dict
         elif self.backend == "file":
@@ -165,19 +154,21 @@ class PersistentData:
             The new value to associate it with
 
         """
-        dict = getattr(self, resource + "_data")
-        if resource_key not in dict:
-            dict[resource_key] = {}
-        dict[resource_key][dict_key] = new_val
+        target = getattr(self, resource + "_data")
+        if resource_key not in target:
+            target[resource_key] = {}
+        target[resource_key][dict_key] = new_val
+
+        # Update persistent storage
         if self.backend == "aws":
             # AWS wants the data in this format lol
-            aws_dict = dict[resource_key].copy()
-            aws_dict[resource_key_names[resource]] = resource_key
+            aws_dict = target[resource_key].copy()
+            aws_dict[RESOURCE_KEY_NAMES[resource]] = resource_key
 
             table = getattr(self, resource + "_table")
             table.put_item(Item=aws_dict)
         elif self.backend == "file":
-            util.save(dict, resource + '.pkl.gzip')
+            util.save(target, resource + '.pkl.gzip')
         else:
             raise ValueError("Backend must be either aws or file")
 
@@ -209,26 +200,40 @@ class TangyBotBackend:
     Attributes
     ----------
     persist: PersistentData
-        The persistent data to use
+        The persistent data storage to use
 
     session: Asynchronous request maker, or None
         The ClientSession to use in TangyBot
-        If None, create a new session
+        If None, uses our own session, but please close it when needed
 
     hero_info: HeroData
-        The hero information store (i.e. name)
+        The hero information store (i.e. localized name)
 
     """
 
     def __init__(self, backend="file", session=None):
+        """
+        Construct TangyBot's backend
+
+        Parameters
+        ----------
+        backend: str
+            The backend to use for persistent storage
+
+        session: Asynchronous request maker, or None
+            The ClientSession to use in TangyBot
+            If None, create a new session, but please close it when needed
+
+        """
         self.persist = PersistentData(backend)
         self.session = session or aiohttp.ClientSession()
         self.hero_info = hero_data.HeroData()
 
     # TODO stolen from discord client. Is this needed?
-    @asyncio.coroutine
-    def close(self):
-        yield from self.session.close()
+    async def close(self):
+        """Close the session on cleanup."""
+        if not self.session.closed:
+            await self.session.close()
 
     async def dispatch(self, args, username="user"):
         """
@@ -279,6 +284,8 @@ class TangyBotBackend:
             raise TangyBotError("Unknown command " + args.command +
                                 " in command dispatch!")
         # Splatter and pass username as kwargs
+        # Looks like the call site will have to have their own
+        # **_ kwargs declaration to eat up the unused kwargs...
         res = await func_to_call(username=username, **vars(args))
         return res
 
@@ -341,7 +348,6 @@ class TangyBotBackend:
         }
 
         try:
-            # TODO wonder if we can replace this part with aiohttp
             async with self.session.get(url, headers=headers) as req:
                 content = await req.text()
             soup = BeautifulSoup(content, 'lxml')
@@ -351,32 +357,44 @@ class TangyBotBackend:
 
             players = soup.findAll("span", {"class": "tool-tip"})
 
+            # Maps steam 32 id to names
             player_dict = extract_id_user(players)
 
-            steam_ids = [player['steam_id'] for _, player
-                         in player_dict.items()]
+            steam_ids = list(player_dict.keys())
 
             self.persist.update('session', username, 'last_players',
                                 steam_ids)
 
-            for username, data in player_dict.items():
-                self.persist.update('profile', data['steam_id'],
-                                       'csl_name', username)
+            # Update CSL names
+            for steam_id, data in player_dict.items():
+                self.persist.update('profile', steam_id,
+                                    'csl_name', data['csl_name'])
 
             tasks = (get_account_info_async(self.session, id) for id in
                      steam_ids)
 
-            return_dict = dict(zip(player_dict.keys(),
+            return_dict = dict(zip(steam_ids,
                                    await asyncio.gather(*tasks)))
 
+            # Update steam names
+            for prof, res in return_dict.items():
+                try:
+                    self.persist.update('profile', prof, 'steam_name',
+                                        res['profile']['personaname'])
+                except KeyError:
+                    self.persist.update('profile', prof, 'steam_name',
+                                        'INVALID?')
+
+            # Merge in known profile information
             merged_dict = {}
             for key in player_dict:
-                merged_dict[key] = {**player_dict[key], **return_dict[key]}
+                merged_dict[key] = {**self.persist.profile_data[key],
+                                    **return_dict[key]}
 
             return dict(team_name=team_name,
                         players=merged_dict)
-        except HTTPError as e:
-            raise TangyBotError("_lookup: " + e.msg)
+        except HTTPError as err:
+            raise TangyBotError("_lookup: " + err.msg)
 
     async def profile(self, last, profiles, num_games, max_heroes,
                       min_games, tourney_only, username="user", **_):
@@ -415,36 +433,65 @@ class TangyBotBackend:
         TangyBotError
             On a lookup error, i.e. team was not found
 
+        Returns
+        -------
+        data: dict
+
         """
         # Check args for validity first
         if last and not profiles:
             # Check for last team number
             try:
-                last_players = self.persist.session_data[username]['last_players']
+                last_players = self.persist.session_data[username][
+                    'last_players']
             except KeyError:
                 raise TangyBotError("Profile: user has no last players to use")
             except AttributeError:
                 raise TangyBotError("Profile: user has no last players to use")
             return await self._profile(last_players, num_games, max_heroes,
-                                       min_games, tourney_only, username)
+                                       min_games, tourney_only)
         elif profiles and not last:
             self.persist.update('session', username, 'last_players',
                                 profiles)
             return await self._profile(profiles, num_games, max_heroes,
-                                       min_games, tourney_only, username)
+                                       min_games, tourney_only)
         else:
             raise TangyBotError("Profile: must specify either last or "
                                 "profile list, but got neither!")
 
     async def _profile(self, profiles, num_games, max_heroes,
-                       min_games, tourney_only, username):
+                       min_games, tourney_only):
         """Internal profile implementation."""
-        names = [self.persist.profile_data[id]['csl_name'] for id in profiles]
+        # Fill missing dict items if needed
+        await self._fill_missing_accounts([prof for prof in profiles if prof
+                                           not in self.persist.profile_data])
+
+        # Resume normal tasks
         tasks = (self._get_account_heroes(profile, num_games, max_heroes,
                                           min_games, tourney_only) for
                  profile in profiles)
-        return_dict = dict(zip(names, await asyncio.gather(*tasks)))
-        return dict(profiles=return_dict)
+        return_dict = dict(zip(profiles, await asyncio.gather(*tasks)))
+
+        # Merge in known profile information
+        merged_dict = {}
+        for key in return_dict:
+            merged_dict[key] = {**self.persist.profile_data[key],
+                                'heroes': return_dict[key]}
+
+        return dict(players=merged_dict)
+
+    async def _fill_missing_accounts(self, missing_profiles):
+        """Fill in account information about missing profiles."""
+        tasks = (get_account_info_async(self.session, id) for
+                 id in missing_profiles)
+        results = await asyncio.gather(*tasks)
+
+        for prof, res in zip(missing_profiles, results):
+            try:
+                self.persist.update('profile', prof, 'steam_name',
+                                    res['profile']['personaname'])
+            except KeyError:
+                self.persist.update('profile', prof, 'steam_name', 'INVALID??')
 
     async def _get_account_heroes(self, id_32, num_games, max_heroes=5,
                                   min_games=0, tourney_only=False):
@@ -505,8 +552,8 @@ async def main(team):
 
 if __name__ == "__main__":
     # michigan
-    url = 839
+    mich_url = 839
 
     loop = asyncio.get_event_loop()
-    tangy_res = loop.run_until_complete(main(url))
+    tangy_res = loop.run_until_complete(main(mich_url))
     print(tangy_res)

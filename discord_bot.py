@@ -44,6 +44,10 @@ class TangyBotClient(discord.Client):
         self.arg_parse = TangyBotArgParse()
         self.frontend_format = FrontendFormatter()
 
+    async def close(self):
+        super(TangyBotClient, self).close()
+        await self.the_tangy.close()
+
     async def on_ready(self):
         print("Tangy Bot Start")
         await self.change_presence(game=discord.Game(name="Secret Strats"))
@@ -70,11 +74,10 @@ class TangyBotClient(discord.Client):
             try:
                 res = self.arg_parse.parse_args(read_command)
 
-                # await self.send_message(message.channel, "Received "
-                #                                          "command " +
-                #                         res.command)
-                # await self.send_message(message.channel, str(res))
-                # await self.send_typing(message.channel)
+                await self.send_message(message.channel, "Received command \""
+                                        + res.command + "\" with args " +
+                                        str(vars(res)))
+                await self.send_typing(message.channel)
 
                 api_resp = await self.the_tangy.dispatch(res,
                                                          str(message.author))

@@ -3,6 +3,10 @@
 # Divider string to break up sections, if needed
 DIVIDER_STR = "`" + "-" * 98 + "`"
 
+# URL headers for dota stats sites
+DOTABUFF_HEAD = "https://dotabuff.com/players/"
+OPENDOTA_HEAD = "https://www.opendota.com/players/"
+
 
 def rank_string(player_resp):
     """Create rank string from player dictionary."""
@@ -93,33 +97,47 @@ class FrontendFormatter:
 
     def lookup(self, team_name, players):
         """Format lookup string."""
-        return_strings = [team_name + "\n"]
-        for username, player in players.items():
+        return_strings = ["CSL Team: " + team_name]
+        for steam_id, player in players.items():
             return_string = DIVIDER_STR + "\n"
-            return_string += "CSL USERNAME:   " + str(username or "?") + "\n"
-            return_string += "STEAM USERNAME: "
-            return_string += player["profile"]["personaname"] + "\n"
+            return_string += "CSL USERNAME:   " + player['csl_name'] + "\n"
+            return_string += "STEAM USERNAME: " + player['steam_name'] + "\n"
 
             return_string += "SOLO MMR: " + str(
                 player["solo_competitive_rank"] or "?") + "\n"
-            return_string += "MMR ESTIMATE: " + str(
-                player["mmr_estimate"]["estimate"] or "?") + "\n"
+
+            return_string += "MMR ESTIMATE: "
+            try:
+                return_string += str(player["mmr_estimate"]["estimate"])
+            except KeyError:
+                return_string += "?"
+            return_string += "\n"
+
             return_string += "RANK TIER: " + rank_string(player) + "\n"
 
-            return_string += "<" + str(player["dotabuff_link"] or "") + ">\n"
-            return_string += "<" + str(player["opendota_link"] or "") + ">\n"
+            return_string += "<" + DOTABUFF_HEAD + str(steam_id) + ">\n"
+            return_string += "<" + OPENDOTA_HEAD + str(steam_id) + ">\n"
 
             return_strings.append(return_string)
         return_strings.append(DIVIDER_STR)
         return return_strings
 
-    def profile(self, profiles):
+    def profile(self, players):
         """Format profile string."""
-        return_strings = []
-        for username, heroes in profiles.items():
-            return_string = username + ":\n```\n"
+        return_strings = ["Profiling results"]
+        for steam_id, player in players.items():
+            user_string = "Unknown player " + str(steam_id) + " (yell at Bo)"
+            try:
+                user_string = player['csl_name']
+            except KeyError:
+                try:
+                    user_string = player['steam_name'] + " (steam name)"
+                except KeyError:
+                    pass
 
-            for hero in heroes:
+            return_string = user_string + ":\n```\n"
+
+            for hero in player['heroes']:
                 return_string += "{:20s}".format(hero['loc_name'])
                 return_string += f"{hero['games']:3d} games "
 
@@ -127,7 +145,7 @@ class FrontendFormatter:
                 return_string += create_ascii_bar(hero['winrate']) + " ("
 
                 return_string += f"{100 * hero['winrate']:6.2f}" + "%)\n"
-            if not heroes:
+            if not player['heroes']:
                 return_string += "No heroes!\n"
 
             return_string += "```"

@@ -4,8 +4,11 @@ from urllib.error import HTTPError
 import aiohttp
 import requests
 
-# Magic number :O
+# Magic number (from steam) :O
 INDIVIDUAL_CONSTANT = 0x0110000100000000
+
+# Conversion factor between steam32 ID and account number
+CONVERSION_FACTOR = 76561197960265728
 
 
 def convert_text_to_32id(steam_id):
@@ -15,7 +18,12 @@ def convert_text_to_32id(steam_id):
     steam_id = steam_id.split(":")
     instance = int(steam_id[1])
     account_number = int(steam_id[2]) * 2 + instance + INDIVIDUAL_CONSTANT
-    return account_number - 76561197960265728
+    return account_number - CONVERSION_FACTOR
+
+
+def convert_32id_to_account(steam_id):
+    """Convert steam 32 ID to account number."""
+    return steam_id + CONVERSION_FACTOR
 
 
 def get_account_info_sync(id_32):
