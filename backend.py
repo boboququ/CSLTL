@@ -208,7 +208,7 @@ class TangyBotBackend:
 
     Attributes
     ----------
-    persistent: PersistentData
+    persist: PersistentData
         The persistent data to use
 
     session: Asynchronous request maker, or None
@@ -221,7 +221,7 @@ class TangyBotBackend:
     """
 
     def __init__(self, backend="file", session=None):
-        self.persistent = PersistentData(backend)
+        self.persist = PersistentData(backend)
         self.session = session or aiohttp.ClientSession()
         self.hero_info = hero_data.HeroData()
 
@@ -266,9 +266,9 @@ class TangyBotBackend:
 
         """
         # Set default value
-        if username not in self.persistent.session_data:
-            self.persistent.session_data[username] = dict(last_team=None,
-                                                          last_players=None)
+        if username not in self.persist.session_data:
+            self.persist.session_data[username] = dict(last_team=None,
+                                                       last_players=None)
 
         try:
             func_to_call = getattr(self, args.command)
@@ -315,15 +315,15 @@ class TangyBotBackend:
         if last and not team_number:
             # Check for last team number
             try:
-                last_team = self.persistent.session_data[username]['last_team']
+                last_team = self.persist.session_data[username]['last_team']
             except KeyError:
                 raise TangyBotError("Lookup: user has no last team to use")
             if last_team is None:
                 raise TangyBotError("Lookup: user has no last team to use")
             return await self._lookup(last_team, username)
         elif team_number and not last:
-            self.persistent.update('session', username, 'last_team',
-                                   team_number)
+            self.persist.update('session', username, 'last_team',
+                                team_number)
             return await self._lookup(team_number, username)
         else:
             raise TangyBotError("Lookup: must specify either last or "
@@ -356,11 +356,11 @@ class TangyBotBackend:
             steam_ids = [player['steam_id'] for _, player
                          in player_dict.items()]
 
-            self.persistent.update('session', username, 'last_players',
-                                   steam_ids)
+            self.persist.update('session', username, 'last_players',
+                                steam_ids)
 
             for username, data in player_dict.items():
-                self.persistent.update('profile', data['steam_id'],
+                self.persist.update('profile', data['steam_id'],
                                        'csl_name', username)
 
             tasks = (get_account_info_async(self.session, id) for id in
@@ -420,7 +420,7 @@ class TangyBotBackend:
         if last and not profiles:
             # Check for last team number
             try:
-                last_players = self.persistent.session_data[username]['last_players']
+                last_players = self.persist.session_data[username]['last_players']
             except KeyError:
                 raise TangyBotError("Profile: user has no last players to use")
             except AttributeError:
@@ -428,8 +428,8 @@ class TangyBotBackend:
             return await self._profile(last_players, num_games, max_heroes,
                                        min_games, tourney_only, username)
         elif profiles and not last:
-            self.persistent.update('session', username, 'last_players',
-                                   profiles)
+            self.persist.update('session', username, 'last_players',
+                                profiles)
             return await self._profile(profiles, num_games, max_heroes,
                                        min_games, tourney_only, username)
         else:
@@ -439,7 +439,7 @@ class TangyBotBackend:
     async def _profile(self, profiles, num_games, max_heroes,
                        min_games, tourney_only, username):
         """Internal profile implementation."""
-        names = [self.persistent.profile_data[id]['csl_name'] for id in profiles]
+        names = [self.persist.profile_data[id]['csl_name'] for id in profiles]
         tasks = (self._get_account_heroes(profile, num_games, max_heroes,
                                           min_games, tourney_only) for
                  profile in profiles)
