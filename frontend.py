@@ -135,16 +135,35 @@ class FrontendFormatter:
                 except KeyError:
                     pass
 
-            return_string = user_string + ":\n```\n"
+            return_string = user_string + ":\n```diff\n"
 
             for hero in player['heroes']:
+                # Diff color highlighting
+                if hero['winrate'] <= 0.4:
+                    return_string += "- "
+                elif hero['winrate'] >= 0.6:
+                    return_string += "+ "
+                else:
+                    return_string += "  "
+
                 return_string += "{:20s}".format(hero['loc_name'])
                 return_string += f"{hero['games']:3d} games "
 
                 # Winrate bar
                 return_string += create_ascii_bar(hero['winrate']) + " ("
 
-                return_string += f"{100 * hero['winrate']:6.2f}" + "%)\n"
+                return_string += f"{100 * hero['winrate']:6.2f}" + "%) "
+
+                # Flavor emoji
+                if hero['winrate'] <= 0.3:
+                    return_string += "\N{DOG FACE}"
+                elif hero['winrate'] >= 0.7:
+                    return_string += "\N{FROG FACE}"
+                if hero['winrate'] >= 0.6 and hero['games'] >= 10:
+                    return_string += "\N{FIRE}"
+
+                return_string += "\n"
+
             if not player['heroes']:
                 return_string += "No heroes!\n"
 
