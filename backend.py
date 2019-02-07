@@ -101,7 +101,7 @@ class PersistentData:
     def __init__(self, backend="file"):
         self.backend = backend
         if backend == "aws":
-            self.dynamodb = boto3.resource('dynamodb')
+            self.dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
             self.session_table = self.dynamodb.Table("TangyBot_Session")
             self.profile_table = self.dynamodb.Table("TangyBot_Profile")
         elif backend == "file":
