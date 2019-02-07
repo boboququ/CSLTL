@@ -1,5 +1,8 @@
 """Basic frontend string parsing tasks."""
 
+# Divider string to break up sections, if needed
+DIVIDER_STR = "`" + "-" * 98 + "`"
+
 
 def rank_string(player_resp):
     """Create rank string from player dictionary."""
@@ -31,6 +34,20 @@ def buffer_strings(strings, length_limit=2000):
             results[-1] += "\n" + string
             current_len += len(string) + 1
     return results
+
+
+def create_ascii_bar(perc, num_bars=20, midpoint=True):
+    """Create an ascii bar representing the given percentage."""
+    return_string = "|"
+    rounded_bars = round(num_bars * perc)
+    winrate_bar = "-" * rounded_bars + " " * (num_bars - rounded_bars)
+    if midpoint:
+        mid_ind = num_bars//2
+        return_string += winrate_bar[:mid_ind] + "|" + winrate_bar[mid_ind:]
+    else:
+        return_string += winrate_bar
+    return_string += "|"
+    return return_string
 
 
 class FrontendFormatter:
@@ -78,7 +95,7 @@ class FrontendFormatter:
         """Format lookup string."""
         return_strings = [team_name + "\n"]
         for username, player in players.items():
-            return_string = "-" * 100 + "\n"
+            return_string = DIVIDER_STR + "\n"
             return_string += "CSL USERNAME:   " + str(username or "?") + "\n"
             return_string += "STEAM USERNAME: "
             return_string += player["profile"]["personaname"] + "\n"
@@ -93,7 +110,7 @@ class FrontendFormatter:
             return_string += "<" + str(player["opendota_link"] or "") + ">\n"
 
             return_strings.append(return_string)
-        return_strings.append("-" * 100)
+        return_strings.append(DIVIDER_STR)
         return return_strings
 
     def profile(self, profiles):
@@ -104,8 +121,12 @@ class FrontendFormatter:
 
             for hero in heroes:
                 return_string += "{:20s}".format(hero['loc_name'])
-                return_string += f"{hero['games']:3d} games @ "
-                return_string += f"{100 * hero['winrate']:.2f}" + "% winrate\n"
+                return_string += f"{hero['games']:3d} games "
+
+                # Winrate bar
+                return_string += create_ascii_bar(hero['winrate']) + " ("
+
+                return_string += f"{100 * hero['winrate']:6.2f}" + "%)\n"
             if not heroes:
                 return_string += "No heroes!\n"
 

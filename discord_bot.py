@@ -1,7 +1,7 @@
 """Discord bindings for TangyBot."""
 
-import asyncio
 import os
+import sys
 
 import discord
 
@@ -38,6 +38,7 @@ class TangyBotClient(discord.Client):
 
     def __init__(self, backend="file"):
         super(TangyBotClient, self).__init__()
+        print("Launching with backend", backend)
         self.the_tangy = TangyBotBackend(backend=backend,
                                          session=self.http.session)
         self.arg_parse = TangyBotArgParse()
@@ -105,7 +106,7 @@ class TangyBotClient(discord.Client):
 if __name__ == '__main__':
     # token from environment variables
 
-    client = TangyBotClient("aws")
+    client = TangyBotClient(sys.argv[1] if len(sys.argv) == 2 else "aws")
 
     discord_token = os.environ.get("DISCORD_TOKEN")
     discord_client_id = os.environ.get("DISCORD_CLIENT_ID")
