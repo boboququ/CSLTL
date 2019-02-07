@@ -13,7 +13,7 @@ lookup ([--last] | <team_number>)
     and also stores them so a call with --last will work also.
 
 profile ([--last] | [user_1, user_2, ...]) [--num_games (100)]
-        [--top_n (5)] [--games_n (5)] [--tourney_only]
+        [--max_heroes (5)] [--min_games (5)] [--tourney_only]
     Generates a more detailed profile for the listed players.
     If the last option is specified, profiles are created for all
     players that were in the command; user_i will be considered an error.
@@ -22,14 +22,16 @@ profile ([--last] | [user_1, user_2, ...]) [--num_games (100)]
     The num_games parameter is the max number of games they've recently
     played to look back at. The default is 100.
 
-    The games_n parameter is the minimum number of games on a hero to display.
-    The top_n parameter is the max number of most played heroes to display.
-    The default is 5.
+    The min_games parameter is the minimum number of games on a hero
+    required to be returned.
+    The max_heroes parameter is the max number of most played heroes to
+    be returned.
 
     The tourney only flag limits the results to tournament lobbies only.
 
-session [--delete]
-    Reports
+session [user_1, user_2, ...]
+    Reports the current session variables for given users.
+    If no usernames are given, return those of the caller.
 
 """
 
@@ -159,19 +161,23 @@ class TangyBotArgParse:
             'Game '
             'filtering options')
 
-        self.profile_filter.add_argument("--top_n", type=int, default=5,
+        self.profile_filter.add_argument("-m", "--max_heroes", type=int,
+                                         default=5,
                                          help="Report at most the top n "
                                               "heroes played")
-        self.profile_filter.add_argument("--games_n", type=int, default=5,
+        self.profile_filter.add_argument("-g", "--min_games", type=int,
+                                         default=5,
                                          help="Report all heroes with at "
                                               "least this many games played.")
 
-        self.profile_filter.add_argument("--num_games", type=int, default=100,
+        self.profile_filter.add_argument("-n", "--num_games", type=int,
+                                         default=100,
                                          help="The previous number of games "
                                               "to consider.")
 
         # Lobby only
-        self.profile_parser.add_argument("--tourney_only", action='store_true',
+        self.profile_parser.add_argument("-t", "--tourney_only",
+                                         action='store_true',
                                          help="Set if only lobby games are "
                                               "desired")
 
@@ -206,7 +212,7 @@ async def main(args):
     """Main CLI for testing."""
     async with aiohttp.ClientSession() as session:
         the_tangy = TangyBotBackend(session=session)
-        return await the_tangy.command_dispatch(args)
+        return await the_tangy.dispatch(args)
 
 
 # Debugging main; enter your args however you want :^)

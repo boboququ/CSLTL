@@ -4,15 +4,12 @@ from urllib.error import HTTPError
 import aiohttp
 import requests
 
-import hero_data
-
-# Mapping of hero information based on hero id
-hero_info = hero_data.HeroData()
 # Magic number :O
 INDIVIDUAL_CONSTANT = 0x0110000100000000
 
 
 def convert_text_to_32id(steam_id):
+    """Convert steam ID text to steam 32 ID."""
     steam_id = steam_id[6:]
     # print(steam_id)
     steam_id = steam_id.split(":")
@@ -23,7 +20,7 @@ def convert_text_to_32id(steam_id):
 
 def get_account_info_sync(id_32):
     """
-    Synchronously get account details with requests.
+    Get account details synchronously with requests.
 
     Parameters
     ----------
@@ -47,7 +44,7 @@ def get_account_info_sync(id_32):
 
 async def get_account_info_async(session, id_32):
     """
-    Asynchronously get account details with aiohttp.
+    Get account details asynchronously with aiohttp.
 
     Parameters
     ----------
@@ -72,10 +69,9 @@ async def get_account_info_async(session, id_32):
             return await req.json()
 
 
-def get_account_heroes_sync(id_32, matches_limit=100, num_heroes=5,
-                            min_games=0, lobby_only=False):
+def get_account_heroes_sync(id_32, matches_limit=100, lobby_only=False):
     """
-    Synchronously get the most played heroes for this player with requests.
+    Get the most played heroes for this player synchronously with requests.
 
     For more information about the API endpoint used here, see the docs at:
     https://docs.opendota.com/#tag/players%2Fpaths%2F~1players~1%7Baccount_id%7D~1heroes%2Fget
@@ -91,12 +87,6 @@ def get_account_heroes_sync(id_32, matches_limit=100, num_heroes=5,
 
     matches_limit: int (default 100)
         The number of recent matches to consider for this player.
-
-    num_heroes: int (default 5)
-        The maximum number of most played heroes to display.
-
-    min_games: int (default 0)
-        The minimum number of games on a hero to display.
 
     lobby_only: bool (default False)
         Limit match results to lobby matches only?
@@ -116,14 +106,13 @@ def get_account_heroes_sync(id_32, matches_limit=100, num_heroes=5,
         raise HTTPError(url=api, code=req.status_code, hdrs=[], fp=None,
                         msg="bad call to api in get_account_heroes_sync")
     else:
-        return get_account_heroes(req.json(), num_heroes, min_games)
+        return req.json()
 
 
 async def get_account_heroes_async(session: aiohttp.ClientSession, id_32,
-                                   matches_limit=100, num_heroes=5,
-                                   min_games=0, lobby_only=False):
+                                   matches_limit=100, lobby_only=False):
     """
-    Asynchronously get the most played heroes for this player with aiohttp.
+    Get the most played heroes for this player asynchronously with aiohttp.
 
     For more information about the API endpoint used here, see the docs at:
     https://docs.opendota.com/#tag/players%2Fpaths%2F~1players~1%7Baccount_id%7D~1heroes%2Fget
@@ -143,12 +132,6 @@ async def get_account_heroes_async(session: aiohttp.ClientSession, id_32,
     matches_limit: int (default 100)
         The number of recent matches to consider for this player.
 
-    num_heroes: int (default 5)
-        The maximum number of most played heroes to display.
-
-    min_games: int (default 0)
-        The minimum number of games on a hero to display.
-
     lobby_only: bool (default False)
         Limit match results to lobby matches only?
 
@@ -167,47 +150,7 @@ async def get_account_heroes_async(session: aiohttp.ClientSession, id_32,
             raise HTTPError(url=api, code=req.status, hdrs=[], fp=None,
                             msg="bad call to api in get_account_heroes_async")
         else:
-            return get_account_heroes(await req.json(), num_heroes, min_games)
-
-
-def get_account_heroes(json, num_heroes=5, min_games=0):
-    """
-        Process the account's most played heroes from OpenDota.
-
-        For more information about the API endpoint used here, see the docs at:
-        https://docs.opendota.com/#tag/players%2Fpaths%2F~1players~1%7Baccount_id%7D~1heroes%2Fget
-
-        Additionally, we add the following key-value pairs to the dictionary:
-            loc_name, containing the hero's English name
-            winrate, containing the player's winrate with the hero
-
-        Parameters
-        ----------
-        json: dict
-            JSON dict response from OpenDota API endpoint.
-
-        num_heroes: int (default 5)
-            The maximum number of most played heroes to display.
-
-        min_games: int (default 0)
-            The minimum number of games on a hero to display.
-
-        Returns
-        -------
-        played_heroes: list of dicts
-            The list of num_heroes heroes that the player has played the most.
-
-        """
-    for hero_dict in json:
-        hero_dict['loc_name'] = hero_info[hero_dict['hero_id']]['loc_name']
-        try:
-            hero_dict['winrate'] = hero_dict['win'] / hero_dict['games']
-        except ZeroDivisionError:
-            # This will definitely happen for unplayed heroes
-            hero_dict['winrate'] = 0.0
-    return sorted([item for item in json if item['games'] >= min_games],
-                  key=lambda item: item['games'],
-                  reverse=True)[:num_heroes]
+            return await req.json()
 
 
 if __name__ == '__main__':

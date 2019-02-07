@@ -28,7 +28,7 @@ def buffer_strings(strings, length_limit=2000):
             current_len = len(string)
         else:
             # We can append here
-            results[-1] += string + "\n"
+            results[-1] += "\n" + string
             current_len += len(string) + 1
     return results
 
@@ -49,6 +49,8 @@ class FrontendFormatter:
     def dispatch(self, command, api_response):
         """
         Dispatch to help format the API response for a given command.
+
+        Please call this function instead of calling them directly.
 
         Parameters
         ----------
@@ -98,7 +100,7 @@ class FrontendFormatter:
         """Format profile string."""
         return_strings = []
         for username, heroes in profiles.items():
-            return_string = username + ":\n```"
+            return_string = username + ":\n```\n"
 
             for hero in heroes:
                 return_string += "{:20s}".format(hero['loc_name'])

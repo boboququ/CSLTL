@@ -14,9 +14,14 @@ CLIENT_ID = ""
 
 class TangyBotClient(discord.Client):
     """
-    Custom client subclass for TangyBot.
+    Custom Discord client subclass for TangyBot.
 
     Adds support for argparse, allowing TangyBot to be used like any CLI tool.
+
+    Then uses its own instance of a TangyBotBackend to perform the actual
+    querying, before formatting the strings using the frontend formatter and
+    writing the end results to the Discord channel where the query was
+    initially received.
 
     Attributes
     ----------
@@ -31,9 +36,10 @@ class TangyBotClient(discord.Client):
 
     """
 
-    def __init__(self):
+    def __init__(self, backend="file"):
         super(TangyBotClient, self).__init__()
-        self.the_tangy = TangyBotBackend(self.http.session)
+        self.the_tangy = TangyBotBackend(backend=backend,
+                                         session=self.http.session)
         self.arg_parse = TangyBotArgParse()
         self.frontend_format = FrontendFormatter()
 
@@ -62,8 +68,15 @@ class TangyBotClient(discord.Client):
 
             try:
                 res = self.arg_parse.parse_args(read_command)
-                api_resp = await self.the_tangy.command_dispatch(res,
-                                                                 message.author)
+
+                # await self.send_message(message.channel, "Received "
+                #                                          "command " +
+                #                         res.command)
+                # await self.send_message(message.channel, str(res))
+                # await self.send_typing(message.channel)
+
+                api_resp = await self.the_tangy.dispatch(res,
+                                                         str(message.author))
                 strings = self.frontend_format.dispatch(res.command, api_resp)
 
                 # write_tasks = (self.send_message(message.channel, string)
@@ -89,14 +102,15 @@ class TangyBotClient(discord.Client):
                                 "\n```")
 
 
-# token from environment variables
-
-client = TangyBotClient()
-
 if __name__ == '__main__':
+    # token from environment variables
+
+    client = TangyBotClient("aws")
+
     discord_token = os.environ.get("DISCORD_TOKEN")
     discord_client_id = os.environ.get("DISCORD_CLIENT_ID")
     print(discord_token)
     print(discord_client_id)
+
     CLIENT_ID = discord_client_id
     client.run(discord_token)

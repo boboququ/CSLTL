@@ -63,7 +63,7 @@ class CSL_Lookup_Bot(object):
         return 0
 
     def handle_help_message(self, channel):
-        message = "How to Use: @tangy_bot lookup<space><team_url or team id> \n"
+        message = "How to Use: @tangy_bot lookup <team_url or team id> \n"
         self.write_to_slack(channel, message)
 
     def handle_lookup_message(self, message, channel):
