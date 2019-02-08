@@ -170,3 +170,13 @@ class FrontendFormatter:
             return_string += "```"
             return_strings.append(return_string)
         return return_strings
+
+    def stalk(self, users):
+        """Format stalking string."""
+        return_strings = ["Stalking results:"]
+        for user, res in users.items():
+            return_string = user + ":\n"
+            return_string += "team: " + str(res['last_team']) + "\n"
+            return_string += "players: " + str(res['last_players']) + "\n"
+            return_strings.append(return_string)
+        return return_strings

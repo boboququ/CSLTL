@@ -29,7 +29,7 @@ profile ([--last] | [user_1, user_2, ...]) [--num_games (100)]
 
     The tourney only flag limits the results to tournament lobbies only.
 
-session [user_1, user_2, ...]
+stalk [user_1, user_2, ...]
     Reports the current session variables for given users.
     If no usernames are given, return those of the caller.
 
@@ -181,8 +181,19 @@ class TangyBotArgParse:
                                          help="Set if only lobby games are "
                                               "desired")
 
+        # Session information
+        self.stalk_parser = self.subparsers.add_parser("stalk",
+                                                       help="Access "
+                                                            "session "
+                                                            "information")
+        self.stalk_parser.set_defaults(command="stalk")
+
+        self.stalk_parser.add_argument("users", nargs="*",
+                                       help="User names to get session "
+                                            "information of")
+
         self.parser_list = [self.arg_parser, self.lookup_parser,
-                            self.profile_parser]
+                            self.profile_parser, self.stalk_parser]
 
     def parse_args(self, args=None, namespace=None):
         """Parse arguments using argparse."""

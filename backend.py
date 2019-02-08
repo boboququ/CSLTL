@@ -277,9 +277,6 @@ class TangyBotBackend:
 
         try:
             func_to_call = getattr(self, args.command)
-        # Only handle keyerror here. Propogate other TangyBotErrors
-        except KeyError:
-            raise TangyBotError("Missing command in command dispatch!")
         except AttributeError:
             raise TangyBotError("Unknown command " + args.command +
                                 " in command dispatch!")
@@ -316,6 +313,13 @@ class TangyBotBackend:
         Returns
         -------
         data: dict
+            Dictionary with lookup results. The specific format is:
+
+            team_name: str, the university's name
+
+            players: dict, steam 32 id -> dict of values
+                The dict of values is mostly in the OpenDota API response
+                format, but also includes steam_name and csl_name if they exist
 
         """
         # Check args for validity first
@@ -324,9 +328,11 @@ class TangyBotBackend:
             try:
                 last_team = self.persist.session_data[username]['last_team']
             except KeyError:
-                raise TangyBotError("Lookup: user has no last team to use")
+                raise TangyBotError("Lookup: " + username + " has no last "
+                                                            "team to use")
             if last_team is None:
-                raise TangyBotError("Lookup: user has no last team to use")
+                raise TangyBotError("Lookup: " + username + " has no last "
+                                                            "team to use")
             return await self._lookup(last_team, username)
         elif team_number and not last:
             self.persist.update('session', username, 'last_team',
@@ -436,6 +442,11 @@ class TangyBotBackend:
         Returns
         -------
         data: dict
+            Dictionary with profile results. The specific format is:
+
+            players: dict, steam 32 id -> dict of values
+                Each dict contains csl_name and steam_name, as well as a
+                list of heroes in the OpenDota API heroes response format
 
         """
         # Check args for validity first
@@ -541,6 +552,49 @@ class TangyBotBackend:
         return sorted([item for item in resp if item['games'] >= min_games],
                       key=lambda item: item['games'],
                       reverse=True)[:max_heroes]
+
+    async def stalk(self, users, username="user", **_):
+        """
+        Get the session information for the following users.
+
+        Parameters
+        ----------
+        users: list
+            List of all usernames to get information about
+            If empty, get information about username
+
+        username: str or None
+            The username to use a session
+            If None, use the default session
+
+        Raises
+        ------
+        TangyBotError
+            On a lookup error, i.e. user was not found
+
+        Returns
+        -------
+        data: dict
+            Dictionary with session results. Specifically, the format is:
+
+            users: dict, username -> dict of values
+                Each dict contains last_team and last_players, or None if
+                no applicable previous query is on record
+
+        """
+        # Blank check
+        try:
+            if users:
+                return_dict = {}
+                for username in users:
+                    return_dict[username] = self.persist.session_data[username]
+                return dict(users=return_dict)
+            else:
+                return dict(users={username: self.persist.session_data[
+                                           username]})
+        except KeyError as err:
+            raise TangyBotError("Session data not found for user " +
+                                str(err.args[0]))
 
 
 async def main(team):
