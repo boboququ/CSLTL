@@ -1,6 +1,7 @@
 """Discord bindings for TangyBot."""
 
 import os
+import shlex
 import sys
 
 import discord
@@ -66,7 +67,7 @@ class TangyBotClient(discord.Client):
             print("tagged")
             start_location = message.content.find('>')
             read_message = message.content[start_location + 2:]
-            read_command = read_message.split()
+            read_command = shlex.split(read_message)
             print(read_command)
 
             await self.send_typing(message.channel)
