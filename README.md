@@ -2,28 +2,15 @@
 
 A bot that looks up teams and players for Collegiate Starleague Dota2 and provides draft information.
 
-Currently deployed for Discord and previously deployed for Slack.
+TangyBot is currently deployed for Discord and was previously deployed for Slack.
 
+## TangyBot Examples
 
-## How Do I Use TangyBot?
+// TODO: Insert Tangybot usage example images
 
-Tangybot Interacts with the user similar to a command line interface(CLI). There is functionality for looking up teams,
+Additional examples and explanations can be found at the end of this page.
 
-```
-lookup ([--last] | <team_number>)
-```
-
-and looking up individual players through their steam profiles
-
-
-```
-profile ([--last] | [user_1, user_2, ...]) [--num_games (100)]
-        [--max_heroes (5)] [--min_games (5)] [--tourney_only]
-```
-
-Complete details can be found in [cli.py](https://github.com/boboququ/CSLTL/blob/master/cli.py).
-
-## Getting Started With Your Own Bot
+## Getting Started with Your Own Bot
 
 These instructions will help you get a copy of this project on your local machine. You will need the following minimum prerequisites:
 
@@ -31,7 +18,7 @@ These instructions will help you get a copy of this project on your local machin
 
 If you desire additional functionality, you will need additional prerequisites. These are defined in each of the respective sections below:
 
-### Setting up basic functionality
+### Setting up Basic Functionality
 
 1. Clone this repository.
 2. Install the requirements. Run `pip install -r requirements.txt` in a virtual environment.
@@ -40,13 +27,13 @@ If you desire additional functionality, you will need additional prerequisites. 
 
 ### Running in Discord
 
-If you wish to run Tangybot in a Discord server, you will need the following:
+If you wish to run TangyBot in a Discord server, you will need the following:
 
 * A Discord client ID.
 * A Discord bot token.
 
 1. Set the environment variables for the bot's token and client id. Similar to above, this is done via `export DISCORD_CLIENT_ID=YOUR_BOT_ID` and `export DISCORD_TOKEN=YOUR_BOT_TOKEN`.
-2. Test the bot by running `python discord_bot.py file`. You should see the bot reply with `Tangy Bot Start` and you should be able to invoke TangyBot in Discord. Test it out by typing (in a channel the bot can access) `@TangyBot lookup 839` to try and look up the University of Michigan again.
+2. Test the bot by running `python discord_bot.py file`. You should see the bot reply with `TangyBot Start` and you should be able to invoke TangyBot in Discord. Test it out by typing (in a channel the bot can access) `@TangyBot lookup 839` to try and look up the University of Michigan again.
 
 ### Using AWS Backend
 
@@ -67,7 +54,7 @@ The default region is hardcoded as us-east-2 for the moment, since it seems diff
 
 Create a pull request. Formatting is not really strict PEP8, but try to follow the general ideas.
 
-### Creating a new command
+### Creating a New Command
 
 If you want to create a new command in TangyBot that is invoked in the format `@TangyBot command [args]` you will need to modify the following files:
 
@@ -75,8 +62,45 @@ If you want to create a new command in TangyBot that is invoked in the format `@
 * **backend.py**: Create a new function with the following signature inside TangyBotBackend: `async def command_name(self, your_kwargs, that_you_want, username="user", **_)`. The kwargs that you want should be the same as those that you have defined inside cli.py; `username` is the user that is making the request, and the additional `**_` is required to ensure that no unexpected kwargs (such as `command`) are received and python doesn't complain.
 * **frontend.py**: Create a new function with the following signature inside FrontendFormatter: `def command_name(self, backend_kwargs, that_you_want):` where the arguments are those that you have returned from the backend. For example, if your backend command returned a dict in the format `{name: ...}` you would use `name` as the argument.
 
+## Additional Examples and Explanations
 
-## Contributors:
+Some practical examples for reference. **This does not cover all of the features TangyBot has to offer. Complete details can be found in [cli.py](https://github.com/boboququ/CSLTL/blob/master/cli.py).**
 
-See also the complete list of [contributors](https://github.com/boboququ/CSLTL/graphs/contributors) who have participated in this project
+### lookup
+
+Functionality for looking up CSL teams.
+
+```
+lookup ([--last] | <team_number>)
+```
+
+// TODO: Insert lookup image example
+
+TangyBot remembers the last lookup a user has made. Using the [--last] argument instead of <team_number> will return the last lookup the user made.
+
+// TODO: Insert --last image example
+
+### profile
+
+Functionality for looking up individual players through their steam profiles.
+
+```
+profile ([--last] | [user_1, user_2, ...]) [--num_games (100)]
+        [--max_heroes (5)] [--min_games (5)] [--tourney_only]
+```
+
+// TODO: Insert profile image example
+
+Gathering the steam IDs of each player would be a hassle. Luckily, TangyBot does this for you. Using the [--last] command after a lookup will return the profiles of each player on that team.
+
+//TODO: Insert lookup and profile example
+
+You may also filter the results if you specify parameters. For instance, using the [--num_games] parameter will return results based on the player's most recent number of games. Using the [--tourney_only] flag will filter the results so that they only return the player's lobby games.
+
+//TODO: Insert profile with parameters example
+
+
+## Contributors
+
+See also the complete list of [contributors](https://github.com/boboququ/CSLTL/graphs/contributors) who have participated in this project.
 
