@@ -76,11 +76,11 @@ Functionality for looking up CSL teams.
 lookup ([--last] | <team_number>)
 ```
 
-// TODO: Insert lookup image example
+![Example 3](example_images/ex3.PNG)
 
 TangyBot remembers the last lookup a user has made. Using the [--last] argument instead of <team_number> will return the last lookup the user made.
 
-// TODO: Insert --last image example
+![Example 4](example_images/ex4.PNG)
 
 ### profile
 
@@ -91,15 +91,15 @@ profile ([--last] | [user_1, user_2, ...]) [--num_games (100)]
         [--max_heroes (5)] [--min_games (5)] [--tourney_only]
 ```
 
-// TODO: Insert profile image example
+![Example 5](example_images/ex5.PNG)
 
 Gathering the steam IDs of each player would be a hassle. Luckily, TangyBot does this for you. Using the [--last] command after a lookup will return the profiles of each player on that team.
 
-//TODO: Insert lookup and profile example
+![Example 6](example_images/ex6.PNG)
 
 You may also filter the results if you specify parameters. For instance, using the [--num_games] parameter will return results based on the player's most recent number of games. Using the [--tourney_only] flag will filter the results so that they only return the player's lobby games.
 
-//TODO: Insert profile with parameters example
+![Example 7](example_images/ex7.PNG)
 
 
 ## Contributors
