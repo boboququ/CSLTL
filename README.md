@@ -97,10 +97,11 @@ Gathering the steam IDs of each player would be a hassle. Luckily, TangyBot does
 
 ![Example 6](example_images/ex6.PNG)
 
-You may also filter the results if you specify parameters. For instance, using the [--num_games] parameter will return results based on the player's most recent number of games. Using the [--tourney_only] flag will filter the results so that they only return the player's lobby games.
-
 ![Example 7](example_images/ex7.PNG)
 
+You may also filter the results if you specify parameters. For instance, using the [--num_games] parameter will return results based on the player's most recent number of games. Using the [--tourney_only] flag will filter the results so that they only return the player's lobby games.
+
+![Example 8](example_images/ex8.PNG)
 
 ## Contributors
 
