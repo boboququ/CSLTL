@@ -6,6 +6,7 @@ TangyBot is currently deployed for Discord and was previously deployed for Slack
 
 ## TangyBot Examples
 
+![Example 1](example_images/ex1.PNG)
 // TODO: Insert Tangybot usage example images
 
 Additional examples and explanations can be found at the end of this page.
