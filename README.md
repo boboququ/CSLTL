@@ -93,7 +93,7 @@ profile ([--last] | [user_1, user_2, ...]) [--num_games (100)]
 
 ![Example 5](example_images/ex5.PNG)
 
-Gathering the steam IDs of each player would be a hassle. Luckily, TangyBot does this for you. Using the [--last] command after a lookup will return the profiles of each player on that team.
+Gathering the steam IDs of each player would be a hassle. Luckily, TangyBot does this for you. Using the [--last] command after a team lookup will return the profiles of each player on that team.
 
 ![Example 6](example_images/ex6.PNG)
 
@@ -102,6 +102,8 @@ Gathering the steam IDs of each player would be a hassle. Luckily, TangyBot does
 You may also filter the results if you specify parameters. For instance, using the [--num_games] parameter will return results based on the player's most recent number of games. Using the [--tourney_only] flag will filter the results so that they only return the player's lobby games.
 
 ![Example 8](example_images/ex8.PNG)
+
+The full list of options may be found in [cli.py](https://github.com/boboququ/CSLTL/blob/master/cli.py).
 
 ## Contributors
 
