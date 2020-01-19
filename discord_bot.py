@@ -63,7 +63,7 @@ class TangyBotClient(discord.Client):
             await self.send_message(message.channel, "Present")
         elif message.content == "BoBot":
             await self.send_message(message.channel, "NANI")
-        if message.content.startswith("<@" + CLIENT_ID):
+        if message.content.startswith("<@!" + CLIENT_ID):
             print("tagged")
             start_location = message.content.find('>')
             read_message = message.content[start_location + 2:]
