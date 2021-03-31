@@ -1,6 +1,6 @@
 requests==2.20.0
 slackclient==1.0.2
 beautifulsoup4==4.6.0
-lxml==3.4.2
+lxml==4.6.3
 discord.py==0.16.12
 boto3==1.9.88
